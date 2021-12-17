@@ -2,28 +2,34 @@ package com.devmountain.parse;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Period;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CalendarHelper {
 
-    private DateTimeFormatter formatter;
-    private LocalDate birthdayLocalDate;
-    private LocalDate nowLocalDate;
-    private int currentYear;
+    private final DateTimeFormatter formatter;
+    private final LocalDate birthdayLocalDate;
+    private final LocalDate nowLocalDate;
+    private final int currentYear;
     private List<LocalDate> holidayList;
+    private LocalDate closestHoliday;
 
     public CalendarHelper(String birthdayString) {
         //create DateTimeFormatter with the pattern "M/d/yyyy"
         //formatter = ???;
+        this.formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
 
         //convert String to LocalDate
-        //birthdayLocalDate = ???;
-        //nowLocalDate = ???;
-        //currentYear = ???;
+        this.birthdayLocalDate = LocalDate.parse(birthdayString, formatter);
+//        System.out.println(formatter.format(birthdayLocalDate));
+        this.nowLocalDate = LocalDate.now();
+        this.currentYear = LocalDate.now().getYear();
 
-        //holidayList = initHolidayList(currentYear, nowLocalDate);
+        this.holidayList = initHolidayList(currentYear, nowLocalDate);
     }
 
     public void displayDaysRemainingToHolidaysAndBirthday() {
@@ -45,20 +51,45 @@ public class CalendarHelper {
          */
 
         // you code here
+        Long closestDate = 0L;
         for (LocalDate eachHoliday : holidayList) {
              //you code here
                 //Display the remainingDay between the current day and the corresponding holiday
-//                System.out.println("There are " + remainingDay + " days remaining before Holiday (" + formatter.format(eachHoliday) + ")");
+            if (nowLocalDate.isAfter(eachHoliday)) {
+                eachHoliday = eachHoliday.plusYears(1);
+            }
+            Long remainingDay = ChronoUnit.DAYS.between(nowLocalDate, eachHoliday);
+            System.out.println("There are " + remainingDay + " days remaining before Holiday (" + formatter.format(eachHoliday) + ")");
+
+            //Finding closest holiday to today.
+            if (eachHoliday.equals(holidayList.get(0))) {
+                closestDate = remainingDay;
+                closestHoliday = eachHoliday;
+            }
+            else if (remainingDay < closestDate){
+                closestDate = remainingDay;
+                closestHoliday = eachHoliday;
+            }
+
+
         }
         //Display the Holiday which is closest to the current day
-//        System.out.println("the closest Holiday to the current date (" + formatter.format(nowLocalDate) + ") is: " + formatter.format(closestHoliday));
+
+        System.out.println("the closest Holiday to the current date (" + formatter.format(nowLocalDate) + ") is: " + formatter.format(closestHoliday));
 
         /*
          * Now start calculating the remaining day between the current date and the birthday
          */
-           //your code starts here
+//        LocalDate birthday = birthdayLocalDate.withYear(Integer.parseInt(String.valueOf(Year.now())));
+        LocalDate nextBirthdayLocalDate = birthdayLocalDate.withYear(Year.now().getValue());
+        if (nowLocalDate.isAfter(nextBirthdayLocalDate)) {
+            nextBirthdayLocalDate = nextBirthdayLocalDate.plusYears(1);
+        }
+        Long remainingDay = ChronoUnit.DAYS.between(nowLocalDate, nextBirthdayLocalDate);
+        Long age = ChronoUnit.YEARS.between(birthdayLocalDate, nextBirthdayLocalDate);
+
          //Display the remainingDay between the current day and the birthday
- //       System.out.println("There are " + remainingDay + " days remaining before your " + age + "th birthday (" + formatter.format(nextBirthdayLocalDate) + ")");
+        System.out.println("There are " + remainingDay + " days remaining before your " + age + "th birthday (" + formatter.format(nextBirthdayLocalDate) + ")");
     }
 
 
